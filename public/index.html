@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0809;--card:#181012;--line:#2c1d20;--tx:#f6ece8;--mut:#a08a86;--a:#ff9f43;--b:#ff4d6d;--c:#b5179e;
+--grad:linear-gradient(135deg,var(--a),var(--b) 55%,var(--c));--r:22px}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.5 Figtree,system-ui,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:auto -10% -30% -10%;height:60vh;background:radial-gradient(ellipse at 50% 100%,#ff4d6d40,#ff9f4320 40%,transparent 70%);pointer-events:none;z-index:0}
+h1,h2,h3,.logo{font-family:'Bricolage Grotesque',sans-serif}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+svg{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.btn{background:var(--grad);color:#1a0a0c;font-weight:700;padding:.65em 1.4em;border-radius:99px;box-shadow:0 6px 24px #ff4d6d55;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px #ff4d6d77}.btn:disabled{opacity:.5}
+.ghost{border:1.5px solid var(--line);padding:.55em 1.2em;border-radius:99px;font-weight:600;transition:.15s}
+.ghost:hover{border-color:var(--a);color:var(--a)}.ghost.on{background:#ff9f4318;border-color:var(--a);color:var(--a)}
+.logo{font-weight:800;font-size:1.7rem;display:flex;align-items:center;gap:.4rem}
+.logo svg{color:var(--a);filter:drop-shadow(0 0 8px var(--b))}
+.logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* Auth */
+#auth{position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:1.5rem}
+.auth-box{width:min(420px,100%);text-align:center}
+.auth-box h1{font-size:clamp(2.2rem,8vw,3.2rem);line-height:1.05;margin:1.2rem 0 .6rem;letter-spacing:-.03em}
+.auth-box p.sub{color:var(--mut);margin-bottom:1.8rem}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;text-align:left}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#0d0809;border-radius:99px;padding:4px;margin-bottom:1rem}
+.seg button{padding:.5em;border-radius:99px;font-weight:600;color:var(--mut)}.seg .on{background:var(--grad);color:#1a0a0c}
+input,textarea{width:100%;background:#0d0809;border:1.5px solid var(--line);border-radius:14px;color:var(--tx);font:inherit;padding:.75em 1em;margin-bottom:.7rem;resize:none}
+input:focus,textarea:focus{outline:none;border-color:var(--a);box-shadow:0 0 0 3px #ff9f4322}
+.err{color:var(--b);font-size:.9rem;min-height:1.3em;margin-bottom:.5rem}
+
+/* App layout */
+#app{position:relative;z-index:1;display:grid;grid-template-columns:230px minmax(0,620px) 280px;gap:2rem;justify-content:center;padding:1.5rem}
+nav.side{position:sticky;top:1.5rem;height:max-content;display:flex;flex-direction:column;gap:.4rem}
+nav.side .logo{margin-bottom:1.2rem}
+.nav a,.nav button{display:flex;align-items:center;gap:.8rem;padding:.75rem 1rem;border-radius:16px;font-weight:600;color:var(--mut);width:100%;transition:.15s}
+.nav a:hover,.nav a.on{background:var(--card);color:var(--tx)}.nav a.on svg{color:var(--a)}
+aside.right{position:sticky;top:1.5rem;height:max-content}
+.me-chip{display:flex;gap:.7rem;align-items:center;padding:.8rem;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-top:1rem}
+.av{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;color:#1a0a0c;background:linear-gradient(135deg,hsl(var(--h) 95% 65%),hsl(calc(var(--h) + 50) 90% 55%));box-shadow:0 0 0 2px var(--bg),0 0 14px hsl(var(--h) 90% 55% / .5)}
+.av.lg{width:92px;height:92px;font-size:2.4rem}
+.tabs{display:flex;gap:.5rem;margin-bottom:1rem}
+.compose{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem;margin-bottom:1.2rem;display:flex;gap:.8rem}
+.compose textarea{border:0;background:none;margin:0;padding:.3em 0;min-height:64px;font-size:1.1rem}.compose textarea:focus{box-shadow:none}
+.compose .row{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:.7rem;margin-top:.3rem}
+.cnt{color:var(--mut);font-size:.85rem}
+
+/* Posts: the ember */
+.post{--life:1;position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.2rem .9rem;margin-bottom:1rem;overflow:hidden;
+opacity:calc(.5 + var(--life)*.5);transition:opacity 1s,box-shadow 1s,transform .6s;box-shadow:0 0 calc(var(--life)*28px) hsl(20 100% 55% / calc(var(--life)*.22))}
+.post.dead{opacity:0;transform:scale(.96) translateY(10px)}
+.post.legend{border-color:#ffd16655;box-shadow:0 0 36px #ffc94d33}
+.post.cold{filter:saturate(.5)}
+.ph{display:flex;gap:.8rem;align-items:center}.ph .who{flex:1;min-width:0}.ph b{display:block;line-height:1.2}.ph small{color:var(--mut)}
+.body{margin:.8rem 0 1rem;font-size:1.08rem;white-space:pre-wrap;word-break:break-word}
+.life{height:6px;background:#2c1d20;border-radius:9px;overflow:hidden}
+.life i{display:block;height:100%;width:100%;background:var(--grad);border-radius:9px;transition:width 1s;box-shadow:0 0 12px var(--b)}
+.legend .life i{background:linear-gradient(90deg,#ffd166,#ff9f43,#ffd166);background-size:200%;animation:shine 3s linear infinite}
+@keyframes shine{to{background-position:200%}}
+.meta{display:flex;align-items:center;gap:.3rem;margin-top:.5rem;color:var(--mut);font-size:.85rem}
+.meta .left{flex:1}.acts{display:flex;gap:.3rem}
+.act{display:flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border-radius:99px;color:var(--mut);font-weight:600;transition:.15s}
+.act:hover{background:#ffffff0d;color:var(--tx)}
+.act.liked{color:var(--b);background:#ff4d6d1a}.act.liked svg{fill:var(--b);animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.5)}}
+.cm{border-top:1px solid var(--line);margin-top:.7rem;padding-top:.7rem}
+.cm .c{display:flex;gap:.6rem;margin-bottom:.6rem;font-size:.95rem}.cm .av{width:30px;height:30px;font-size:.8rem}
+.cm form{display:flex;gap:.5rem}.cm input{margin:0}
+.empty{text-align:center;color:var(--mut);padding:3rem 1rem;border:1.5px dashed var(--line);border-radius:var(--r)}
+.empty svg{width:2.4em;height:2.4em;color:var(--a);margin-bottom:.5rem}
+
+/* Profile */
+.cover{height:120px;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(135deg,hsl(var(--h) 90% 55%),hsl(calc(var(--h) + 60) 85% 35%))}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:1.5rem;overflow:hidden}
+.pbody{padding:0 1.4rem 1.4rem}.pbody .av{margin-top:-46px;border:4px solid var(--card)}
+.ptop{display:flex;justify-content:space-between;align-items:flex-end}
+.stats{display:flex;gap:1.6rem;margin-top:1rem}.stats b{font-family:'Bricolage Grotesque';font-size:1.4rem;display:block;line-height:1}.stats span{color:var(--mut);font-size:.85rem}
+.hall-h{display:flex;align-items:center;gap:.5rem;margin:1.6rem 0 .8rem;font-size:1.3rem}.hall-h svg{color:#ffd166}
+.sr{display:flex;gap:.7rem;align-items:center;padding:.6rem;border-radius:14px}.sr:hover{background:var(--card)}
+#toast{position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--grad);color:#1a0a0c;font-weight:700;padding:.7em 1.4em;border-radius:99px;opacity:0;transition:.3s;z-index:9;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.hide{display:none!important}
+.bar{display:none}
+
+@media(max-width:1020px){#app{grid-template-columns:70px minmax(0,620px)}aside.right{display:none}nav.side .logo b,.nav span{display:none}.nav a{justify-content:center}}
+@media(max-width:640px){#app{grid-template-columns:1fr;padding:1rem 1rem 6rem}
+nav.side{position:fixed;bottom:0;left:0;right:0;top:auto;flex-direction:row;background:#150d0ff0;backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:.4rem;z-index:5;justify-content:space-around}
+nav.side .logo{display:none}.nav{display:flex;width:100%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg style="display:none"><defs>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-2.8 7-7 0-3-1.6-5-3-6.5-.3 1.7-1.2 2.7-2.2 3C14.2 8 12.6 4.6 10 2c0 4-5 6.600-5 13 0 4.200 3 7 7 7z"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.800 4.600a5.500 5.500 0 0 0-7.800 0L12 5.700l-1-1.100a5.500 5.500 0 0 0-7.800 7.800l1 1.100L12 21.200l7.800-7.700 1-1.100a5.500 5.500 0 0 0 0-7.800z"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.600-7 8-7s8 3 8 7"/></symbol>
+<symbol id="i-orbit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.500" transform="rotate(-30 12 12)"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+<symbol id="i-crown" viewBox="0 0 24 24"><path d="m3 7 5 5 4-7 4 7 5-5-2 12H5z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+</defs></svg>
+
+<section id="auth" class="hide">
+  <div class="auth-box">
+    <div class="logo" style="justify-content:center"><svg><use href="#i-flame"/></svg><b>Ember</b></div>
+    <h1>Say it before it burns out.</h1>
+    <p class="sub">Every post lasts 24 hours. Likes and comments keep it glowing.</p>
+    <div class="panel">
+      <div class="seg"><button id="tLogin" class="on">Log in</button><button id="tReg">Sign up</button></div>
+      <input id="aUser" placeholder="Username" autocomplete="username">
+      <input id="aPass" type="password" placeholder="Password" autocomplete="current-password">
+      <div class="err" id="aErr"></div>
+      <button class="btn" id="aGo" style="width:100%">Log in</button>
+    </div>
+  </div>
+</section>
+
+<div id="app" class="hide">
+  <nav class="side">
+    <div class="logo"><svg><use href="#i-flame"/></svg><b>Ember</b></div>
+    <div class="nav">
+      <a href="#/" id="nHome"><svg><use href="#i-bolt"/></svg><span>Feed</span></a>
+      <a href="#/find" id="nFind"><svg><use href="#i-search"/></svg><span>Find people</span></a>
+      <a href="#" id="nMe"><svg><use href="#i-user"/></svg><span>Profile</span></a>
+      <button id="nOut"><svg><use href="#i-out"/></svg><span>Log out</span></button>
+    </div>
+  </nav>
+  <main id="main"></main>
+  <aside class="right">
+    <div class="panel"><b>How embers work</b>
+      <p style="color:var(--mut);font-size:.9rem;margin-top:.5rem">Posts start with 24h of life.<br><svg style="color:var(--b)"><use href="#i-heart"/></svg> Like: +30 min<br><svg style="color:var(--a)"><use href="#i-msg"/></svg> Comment: +5 min<br><svg style="color:#ffd166"><use href="#i-crown"/></svg> Reach 72h of life and it joins your Hall of Embers forever.</p>
+    </div>
+    <div class="me-chip" id="meChip"></div>
+  </aside>
+</div>
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const ic = n => `<svg><use href="#i-${n}"/></svg>`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LIFE = 24 * 36e5;
+let token = localStorage.getItem('ember_t'), me = null, mode = 'orbit', regMode = false;
+
+async function api(p, method = 'GET', body) {
+  const r = await fetch('/api' + p, { method, headers: { 'Content-Type': 'application/json', ...(token && { Authorization: 'Bearer ' + token }) }, body: body && JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { if (r.status === 401) logout(); throw new Error(d.error || 'Something went wrong.'); }
+  return d;
+}
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2400); }
+const fmt = ms => { const m = Math.max(0, Math.floor(ms / 6e4)), h = Math.floor(m / 60); return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h ? `${h}h ${m % 60}m` : `${m}m`; };
+const ago = t => { const m = Math.floor((Date.now() - t) / 6e4); return m < 1 ? 'just now' : m < 60 ? m + 'm ago' : m < 1440 ? Math.floor(m / 60) + 'h ago' : Math.floor(m / 1440) + 'd ago'; };
+const av = (u, h, cls = '') => `<a href="#/u/${esc(u)}" class="av ${cls}" style="--h:${h}">${esc(u[0].toUpperCase())}</a>`;
+
+// ----- Auth -----
+function setReg(r) { regMode = r; $('#tReg').classList.toggle('on', r); $('#tLogin').classList.toggle('on', !r); $('#aGo').textContent = r ? 'Create account' : 'Log in'; $('#aErr').textContent = ''; }
+$('#tLogin').onclick = () => setReg(false); $('#tReg').onclick = () => setReg(true);
+async function doAuth() {
+  try {
+    const d = await api(regMode ? '/register' : '/login', 'POST', { username: $('#aUser').value.trim(), password: $('#aPass').value });
+    token = d.token; localStorage.setItem('ember_t', token); me = d.user; start();
+  } catch (e) { $('#aErr').textContent = e.message; }
+}
+$('#aGo').onclick = doAuth; $('#aPass').onkeydown = e => e.key === 'Enter' && doAuth();
+function logout() { localStorage.removeItem('ember_t'); token = null; me = null; $('#app').classList.add('hide'); $('#auth').classList.remove('hide'); }
+$('#nOut').onclick = logout;
+
+async function start() {
+  if (!token) return logout();
+  try { me = me || await api('/me'); } catch { return; }
+  $('#auth').classList.add('hide'); $('#app').classList.remove('hide');
+  $('#nMe').href = '#/u/' + me.username;
+  $('#meChip').innerHTML = `${av(me.username, me.hue)}<div><b>@${esc(me.username)}</b><br><small style="color:var(--mut)">${esc(me.bio || 'Add a bio on your profile')}</small></div>`;
+  route();
+}
+
+// ----- Post rendering -----
+function postHTML(p) {
+  const left = p.expires_at - Date.now(), pct = p.legend ? 1 : Math.max(0, Math.min(1, left / LIFE));
+  return `<article class="post ${p.legend ? 'legend' : ''}" id="p${p.id}" data-id="${p.id}" data-exp="${p.expires_at}" data-leg="${p.legend}" style="--life:${pct}">
+  <div class="ph">${av(p.username, p.hue)}<div class="who"><a href="#/u/${esc(p.username)}"><b>@${esc(p.username)}</b></a><small>${ago(p.created_at)}</small></div>
+  ${p.username === me.username ? `<button class="act" data-a="del" title="Delete">${ic('trash')}</button>` : ''}</div>
+  <div class="body">${esc(p.body)}</div>
+  <div class="life"><i style="width:${pct * 100}%"></i></div>
+  <div class="meta"><span class="left">${p.legend ? `${ic('crown')} Legend. Burns forever` : `${ic('flame')} <span class="t">${fmt(left)}</span> left`}</span>
+  <div class="acts"><button class="act ${p.liked ? 'liked' : ''}" data-a="like" title="Like: +30 min">${ic('heart')} ${p.likes}</button>
+  <button class="act" data-a="cm" title="Comment: +5 min">${ic('msg')} ${p.comments}</button></div></div>
+  <div class="cm hide"></div></article>`;
+}
+function replace(p) {
+  const old = $('#p' + p.id); if (!old) return;
+  const open = !old.querySelector('.cm').classList.contains('hide'), html = old.querySelector('.cm').innerHTML;
+  old.outerHTML = postHTML(p);
+  if (open) { const n = $('#p' + p.id).querySelector('.cm'); n.classList.remove('hide'); n.innerHTML = html; }
+}
+async function loadComments(el, id) {
+  const cs = await api(`/posts/${id}/comments`);
+  el.innerHTML = cs.map(c => `<div class="c">${av(c.username, c.hue)}<div><b>@${esc(c.username)}</b> ${esc(c.body)}</div></div>`).join('') +
+    `<form><input placeholder="Add fuel with a comment (+5 min)" maxlength="200"><button class="btn">Send</button></form>`;
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const card = b.closest('.post'), id = card.dataset.id;
+  try {
+    if (b.dataset.a === 'like') replace(await api(`/posts/${id}/like`, 'POST'));
+    if (b.dataset.a === 'del' && confirm('Put out this ember for good?')) { await api('/posts/' + id, 'DELETE'); card.remove(); toast('Ember put out'); }
+    if (b.dataset.a === 'cm') { const cm = card.querySelector('.cm'); cm.classList.toggle('hide'); if (!cm.classList.contains('hide')) await loadComments(cm, id); }
+  } catch (err) { toast(err.message); }
+});
+document.addEventListener('submit', async e => {
+  e.preventDefault(); const card = e.target.closest('.post'); if (!card) return;
+  const inp = e.target.querySelector('input'); if (!inp.value.trim()) return;
+  try {
+    const p = await api(`/posts/${card.dataset.id}/comments`, 'POST', { body: inp.value });
+    const cm = card.querySelector('.cm'); await loadComments(cm, card.dataset.id);
+    const keep = cm.innerHTML; replace(p); const n = $('#p' + p.id).querySelector('.cm'); n.classList.remove('hide'); n.innerHTML = keep;
+    toast('+5 minutes of life');
+  } catch (err) { toast(err.message); }
+});
+
+// Keep embers dimming in real time
+setInterval(() => document.querySelectorAll('.post').forEach(c => {
+  if (c.dataset.leg === '1') return;
+  const left = c.dataset.exp - Date.now(), pct = Math.max(0, Math.min(1, left / LIFE));
+  c.style.setProperty('--life', pct); c.classList.toggle('cold', pct < .15);
+  c.querySelector('.life i').style.width = pct * 100 + '%';
+  const t = c.querySelector('.t'); if (t) t.textContent = fmt(left);
+  if (left <= 0) { c.classList.add('dead'); setTimeout(() => c.remove(), 900); }
+}), 15000);
+
+// ----- Views -----
+const empty = (t, s) => `<div class="empty">${ic('flame')}<h3>${t}</h3><p>${s}</p></div>`;
+
+async function feedView() {
+  $('#main').innerHTML = `<div class="compose">${av(me.username, me.hue)}<div style="flex:1"><textarea id="cText" maxlength="280" placeholder="What's burning in your mind?"></textarea>
+  <div class="row"><span class="cnt"><span id="cCnt">0</span>/280 · lasts 24h</span><button class="btn" id="cGo">Ignite</button></div></div></div>
+  <div class="tabs"><button class="ghost ${mode === 'orbit' ? 'on' : ''}" data-m="orbit">${ic('orbit')} Orbit</button><button class="ghost ${mode === 'all' ? 'on' : ''}" data-m="all">${ic('flame')} Blazing</button></div>
+  <div id="list"></div>`;
+  $('#cText').oninput = e => $('#cCnt').textContent = e.target.value.length;
+  $('#cGo').onclick = async () => { try { const p = await api('/posts', 'POST', { body: $('#cText').value }); $('#cText').value = ''; $('#cCnt').textContent = 0; $('#list .empty')?.remove(); $('#list').insertAdjacentHTML('afterbegin', postHTML(p)); toast('Ember lit. 24h on the clock'); } catch (e) { toast(e.message); } };
+  document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mode = b.dataset.m; feedView(); });
+  const posts = await api('/feed?mode=' + mode);
+  $('#list').innerHTML = posts.length ? posts.map(postHTML).join('') : empty(mode === 'orbit' ? 'Your orbit is quiet' : 'Nothing is burning', mode === 'orbit' ? 'Follow people, or switch to Blazing to see what\'s hot.' : 'Be the first to light an ember.');
+}
+
+async function profileView(name) {
+  const u = await api('/users/' + encodeURIComponent(name));
+  const draw = u2 => {
+    $('#main').innerHTML = `<div class="pcard" style="--h:${u2.hue}"><div class="cover"></div><div class="pbody">
+    <div class="ptop"><span class="av lg" style="--h:${u2.hue}">${esc(u2.username[0].toUpperCase())}</span>
+    ${u2.isMe ? `<button class="ghost" id="edit">Edit profile</button>` : `<button class="${u2.isFollowing ? 'ghost on' : 'btn'}" id="fol">${u2.isFollowing ? 'Following' : 'Follow'}</button>`}</div>
+    <h2 style="margin-top:.6rem">@${esc(u2.username)}</h2><p style="color:var(--mut)">${esc(u2.bio || 'No bio yet.')}</p>
+    <div class="stats"><div><b id="fc">${u2.followers}</b><span>followers</span></div><div><b>${u2.following}</b><span>following</span></div><div><b>${u2.live.length}</b><span>burning</span></div><div><b>${u2.hall.length}</b><span>legends</span></div></div>
+    <div id="ed" class="hide" style="margin-top:1rem"><textarea id="bio" maxlength="160" rows="2" placeholder="Short bio">${esc(u2.bio)}</textarea>
+    <label style="color:var(--mut);font-size:.85rem">Avatar color</label><input type="range" id="hue" min="0" max="360" value="${u2.hue}" style="padding:0"><button class="btn" id="save">Save</button></div></div></div>
+    <h3 class="hall-h">${ic('flame')} Burning now</h3>${u2.live.length ? u2.live.map(postHTML).join('') : empty('Nothing burning', u2.isMe ? 'Light a new ember from your feed.' : 'No active embers.')}
+    <h3 class="hall-h">${ic('crown')} Hall of Embers</h3>${u2.hall.length ? u2.hall.map(postHTML).join('') : empty('No legends yet', 'A post earns a place here after 72 hours of life.')}`;
+    if (u2.isMe) {
+      $('#edit').onclick = () => $('#ed').classList.toggle('hide');
+      $('#hue').oninput = e => document.querySelectorAll('.pcard').forEach(x => x.style.setProperty('--h', e.target.value));
+      $('#save').onclick = async () => { me = { ...me, ...await api('/me', 'PUT', { bio: $('#bio').value, hue: $('#hue').value }) }; toast('Profile saved'); start(); };
+    } else $('#fol').onclick = async () => { const r = await api(`/users/${u2.username}/follow`, 'POST'); draw({ ...u2, ...r, isFollowing: r.isFollowing }); };
+  };
+  draw(u);
+}
+
+function findView() {
+  $('#main').innerHTML = `<h2 style="margin-bottom:1rem">Find people</h2><input id="q" placeholder="Search usernames"><div id="res"></div>`;
+  const go = async () => { const r = await api('/search?q=' + encodeURIComponent($('#q').value)); $('#res').innerHTML = r.map(u => `<a class="sr" href="#/u/${esc(u.username)}">${av(u.username, u.hue)}<div><b>@${esc(u.username)}</b><br><small style="color:var(--mut)">${esc(u.bio || '')}</small></div></a>`).join('') || empty('No one found', 'Try another name.'); };
+  $('#q').oninput = go; go();
+}
+
+async function route() {
+  if (!me) return;
+  const h = location.hash.slice(1) || '/';
+  document.querySelectorAll('.nav a').forEach(a => a.classList.remove('on'));
+  try {
+    if (h.startsWith('/u/')) { const n = decodeURIComponent(h.slice(3)); $(n === me.username ? '#nMe' : '#nFind').classList.add('on'); await profileView(n); }
+    else if (h === '/find') { $('#nFind').classList.add('on'); findView(); }
+    else { $('#nHome').classList.add('on'); await feedView(); }
+  } catch (e) { $('#main').innerHTML = empty('Burned out', e.message); }
+}
+addEventListener('hashchange', route);
+start();
+</script>
+</body>
+</html>
